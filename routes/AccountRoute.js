@@ -1,6 +1,5 @@
 const express = require("express");
 const { signupUser, loginUser } = require("../controllers/AccountController");
-const { router } = require("./userRoute");
 router = express();
 
 
