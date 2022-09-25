@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const model = mongoose.model;
+const bcrypt = require("bcrypt");
 
 // account schema
 const accountModel = new Schema({
@@ -16,14 +17,13 @@ const accountModel = new Schema({
 });
 
 // signup custom function
-const bcrypt = require("bcrypt");
-accountModel.static.signup = async function (email, password) {
-  const isExistEmail = this.findOne({ email });
+accountModel.statics.signup = async function (email, password) {
+  const isExistEmail = await this.findOne({ email });
   if (!email || !password) {
-    throw new Error({ error: "empty field is not allowed" });
+    throw new Error("empty field is not allowed");
   }
   if (isExistEmail) {
-    throw new Error({ error: "email already used" });
+    throw new Error("email already used");
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -34,23 +34,23 @@ accountModel.static.signup = async function (email, password) {
 };
 
 // login custom function
-accountModel.static.login = async function (email, password) {
+accountModel.statics.login = async function (email, password) {
   if (!email || !password) {
-    throw new Error({ error: "empty field is not allowed" });
+    throw new Error("empty field is not allowed");
   }
 
   const user = await this.findOne({ email });
   if (!user) {
-    throw new Error({ error: "invalid action" });
+    throw new Error("invalid action");
   }
 
   const passMatch = await bcrypt.compare(password, user.password);
   if (!passMatch) {
-    throw Error({ error: "invalid action" });
+    throw Error("invalid action");
   }
 
   return user;
 };
 
 // export AccountModel to AccountController.js
-module.exports = model("Account", accountModel);
+module.exports = model("account", accountModel);

@@ -61,6 +61,8 @@ const createUser = async (req, res) => {
       .json({ error: "please fill all the fields", emptyArr });
   }
   try {
+    const userId = req.user._id;
+    console.log(userId);
     const user = await userModel.create({
       userName,
       permanentAddress,
@@ -74,6 +76,7 @@ const createUser = async (req, res) => {
       dateOfBirth,
       password,
       isPlateletsDonor,
+      userId,
     });
     res.status(200).json(user);
   } catch (err) {
@@ -84,7 +87,9 @@ const createUser = async (req, res) => {
 // get users
 const getUserInfo = async (req, res) => {
   try {
-    const user = await userModel.find({});
+    const userId = req.user._id;
+    console.log(userId);
+    const user = await userModel.find({ userId });
     res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ err: err.message });
