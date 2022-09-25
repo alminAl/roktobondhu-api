@@ -7,6 +7,9 @@ const {
   deleteUser,
   updateUser,
 } = require("../controllers/userController.js");
+const requireAuth = require("../middleware/requireAuth")
+
+router.use(requireAuth);
 
 // post donor info
 router.post("/", createUser);

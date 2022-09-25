@@ -1,12 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const userRoute = require("./routes/userRoute.js");
+const accountRouter = require("./routes/AccountRoute")
 
 const app = express();
 app.use(express.json());
 
 // use root route api
 app.use("/api/user", userRoute);
+app.use("/api/account", accountRouter);
 
 // mongoose connection
 mongoose
