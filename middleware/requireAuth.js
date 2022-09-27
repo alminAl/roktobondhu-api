@@ -1,4 +1,4 @@
-const accountModel = require("../model/AccountModel");
+const userModel = require("../model/userModel.js");
 const jwt = require("jsonwebtoken");
 
 const requireAuth = async (req, res, next) => {
@@ -14,7 +14,7 @@ const requireAuth = async (req, res, next) => {
   try {
     const { _id } = jwt.verify(token, "DEEP_BLUE_SEA");
 
-    req.user = await accountModel.findOne({ _id }).select("_id");
+    req.user = await userModel.findOne({ _id }).select("_id");
     next();
   } catch (err) {
     res.status(401).json({ error: "Request is not authorized" });

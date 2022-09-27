@@ -1,7 +1,13 @@
 const userModel = require("../model/userModel.js");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-// create user
-const createUser = async (req, res) => {
+const createToken = (_id) => {
+  return jwt.sign({ _id }, "DEEP_BLUE_SEA", { expiresIn: "3d" });
+};
+
+// signup user controller
+const signupUser = async (req, res) => {
   const {
     userName,
     permanentAddress,
@@ -60,9 +66,16 @@ const createUser = async (req, res) => {
       .status(400)
       .json({ error: "please fill all the fields", emptyArr });
   }
+
   try {
-    const userId = req.user._id;
-    console.log(userId);
+    const existingEmail = await userModel.findOne({ email });
+    if (existingEmail) {
+      throw new Error("Email already used");
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
     const user = await userModel.create({
       userName,
       permanentAddress,
@@ -74,72 +87,73 @@ const createUser = async (req, res) => {
       lastDonation,
       gender,
       dateOfBirth,
-      password,
+      password: hash,
       isPlateletsDonor,
-      userId,
     });
-    res.status(200).json(user);
+    const token = createToken(user._id);
+    res.status(200).json({ email, token });
   } catch (err) {
-    res.status(400).json({ err: err.message });
+    res.status(401).json({ error: err.message });
   }
 };
 
-// get users
+// loginUser controller
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await userModel.login(email, password);
+    const token = createToken(user._id);
+
+    res.status(200).json({ email, token });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// get all user information
 const getUserInfo = async (req, res) => {
   try {
-    const userId = req.user._id;
-    console.log(userId);
-    const user = await userModel.find({ userId });
+    const user = await userModel.find({});
     res.status(200).json(user);
   } catch (err) {
-    res.status(400).json({ err: err.message });
+    res.status(401).json({ error: err.message });
   }
 };
 
-// get single user
-const getSingleUser = async (req, res) => {
-  const id = req.params.id;
+// get single user information
+const getUniqueUser = async (req, res) => {
+  const requestEmail = req.params.email;
   try {
-    const user = await userModel.findById(id);
+    const user = await userModel.findOne({ email: requestEmail });
     res.status(200).json(user);
   } catch (err) {
-    res.status(400).json({ err: err.message });
+    res.status(401).json({ error: err.message });
   }
 };
 
-// delete user
-const deleteUser = async (req, res) => {
-  const id = req.params.id;
+// update user information
+const updateUserInfo = async (req, res) => {
+  const requestEmail = req.params.email;
   try {
-    const user = await userModel.findByIdAndDelete(id);
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(400).json({ err: err.message });
-  }
-};
-
-// update user
-const updateUser = async (req, res) => {
-  const id = req.params.id;
-  try {
-    const user = await userModel.findById(id);
+    const user = await userModel.findOne({ email: requestEmail });
     if (!user) {
-      res.status(400).json({ error: "user not matched" });
+      res.status(400).json({ error: "user not found" });
     } else {
       Object.assign(user, req.body);
       user.save();
       res.status(200).json(user);
     }
   } catch (err) {
-    res.status(400).json({ err: err.message });
+    res.status(401).json({ error: err.message });
   }
 };
 
 // export donorController to donorRoute.js
 module.exports = {
-  createUser,
+  signupUser,
+  loginUser,
   getUserInfo,
-  getSingleUser,
-  deleteUser,
-  updateUser,
+  getUniqueUser,
+  updateUserInfo,
 };
