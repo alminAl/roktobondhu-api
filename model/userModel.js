@@ -69,7 +69,6 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-
 userSchema.statics.login = async function (email, password) {
   if (!email || !password) {
     throw new Error("empty field is not allowed");

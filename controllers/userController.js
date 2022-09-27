@@ -149,6 +149,20 @@ const updateUserInfo = async (req, res) => {
   }
 };
 
+// filter user by bloodGroup and district
+const filterUser = async (req, res) => {
+  const key = req.params.key;
+
+  try {
+    const user = await userModel.find({
+      $or: [{ bloodGroup: { $regex: key } }, { gender : { $regex: key } }],
+    });
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(401).json({ error: err.message });
+  }
+};
+
 // export donorController to donorRoute.js
 module.exports = {
   signupUser,
@@ -156,4 +170,5 @@ module.exports = {
   getUserInfo,
   getUniqueUser,
   updateUserInfo,
+  filterUser,
 };

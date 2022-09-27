@@ -1,5 +1,12 @@
 const express = require("express");
-const { signupUser, loginUser, getUserInfo, getUniqueUser, updateUserInfo } = require("../controllers/userController");
+const {
+  signupUser,
+  loginUser,
+  getUserInfo,
+  getUniqueUser,
+  updateUserInfo,
+  filterUser,
+} = require("../controllers/userController");
 const router = express();
 // const requireAuth = require("../middleware/requireAuth")
 // router.use(requireAuth);
@@ -17,6 +24,9 @@ router.get("/", getUserInfo);
 router.get("/:email", getUniqueUser);
 
 // update user by email
-router.patch("/:email", updateUserInfo);
+router.patch("/edit_user/:email", updateUserInfo);
+
+// filter user by bloodGroup and address
+router.get("/search/:key", filterUser);
 
 module.exports = router;
